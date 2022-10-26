@@ -1,0 +1,27 @@
+{
+  "name": "sql-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sankyrajeev/sql-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sankyrajeev/sql-server/issues"
+  },
+  "homepage": "https://github.com/sankyrajeev/sql-server#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "dotenv": "^16.0.3",
+    "inquirer": "8.2",
+    "mysql2": "^2.3.3"
+  }
+}
