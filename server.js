@@ -196,14 +196,16 @@ async function addEmployee() {
                 .then(answer => {
                     let firstname = answer.first;
                     let lastname = answer.last;
+                    let role = answer.role;
+                    let manager = answer.manager;
 
 
-                    db.query('INSERT INTO employee(first_name,last_name) values (?,?)', [firstname, lastname]).then(res => {
+                    db.query('INSERT INTO employee(first_name,last_name,role_id,manager_id) values (?,?,?,?)', [firstname, lastname,role,manager]).then(res => {
                         // console.log(`The following department has been added to your department list : ${dept}`);
                         menu();
                     })
                 })
-        }
+        })
 
     });
 }
