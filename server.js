@@ -7,13 +7,13 @@ const utils = require('util');
 
 db.query = utils.promisify(db.query);
 
-function menu(){
+function menu() {
     inquirer.prompt([
         {
-            type:"list",
-            name:"choice",
-            message:"Make a choice",
-            choices:[
+            type: "list",
+            name: "choice",
+            message: "Make a choice",
+            choices: [
                 "View All Departments",
                 "View All Roles",
                 "View All Employees",
@@ -25,106 +25,186 @@ function menu(){
             ]
         }
     ])
-    .then(answer =>{
-        switch(answer.choice){
-            case "View All Departments": viewDepartments();
-                break;
+        .then(answer => {
+            switch (answer.choice) {
+                case "View All Departments": viewDepartments();
+                    break;
 
                 case "View All Roles": viewRoles();
-                break;
-                
+                    break;
+
                 case "View All Employees": viewEmployees();
-                break;
+                    break;
 
                 case "Add a Department": addDept();
-                break;
+                    break;
 
                 case "Add a Role": addRole();
-                break;
+                    break;
 
                 case "Add an Employee": addEmployee();
-                break;
+                    break;
 
                 case "Update an Employee Role": updateEmployee();
-                break;
+                    break;
 
                 default:
                     process.exit(0);
-                
-
-                
 
 
-        }
-    })
+
+
+
+            }
+        })
 }
 
 
 
-async function viewDepartments(){
-    const result =await db.query('SELECT * FROM department');
+async function viewDepartments() {
+    const result = await db.query('SELECT * FROM department');
     console.table(result);
     menu();
 }
 
-async function viewRoles(){
+async function viewRoles() {
     const result = await db.query('SELECT role.id,role.title,role.salary,department.name AS department_name FROM role left join department on role.department_id = department.id');
     console.table(result);
     menu();
 }
 
-async function viewEmployees(){
+async function viewEmployees() {
     const result = await db.query('SELECT employee.id, employee.first_name,employee.last_name,role.title,department.name,role.salary,concat(manager.first_name," ",manager.last_name)AS manager FROM employee left join role on employee.role_id = role.id left join department on role.department_id = department.id left join employee manager on manager.id = employee.manager_id');
     console.table(result);
     menu();
 }
 
-async function addRole(){
+async function addRole() {
     inquirer.prompt([
         {
-            type:'input',
-            name:'role',
-            message:'What is the name of the new role?'
+            type: 'input',
+            name: 'role',
+            message: 'What is the name of the new role?'
         },
 
         {
-            type:'input',
-            name:'salary',
-            message:'What is the salary of the new role?'
+            type: 'input',
+            name: 'salary',
+            message: 'What is the salary of the new role?'
         }
     ])
 
-    .then(answer =>{
-        let name = answer.role;
+        .then(answer => {
+            let name = answer.role;
 
-        let salary = answer.salary;
-        db.query('SELECT * FROM department').then((result,error) =>{
-            const departments = result.map(({id,name})=>({
-                value:id,
-                name:name
+            let salary = answer.salary;
+            db.query('SELECT * FROM department').then((result, error) => {
+                const departments = result.map(({ id, name }) => ({
+                    value: id,
+                    name: name
 
-            }))
-            inquirer.prompt([
-                {
-                    type:'list',
-                    name:'choice',
-                    message:'Choose a department',
-                    choices:departments
-                }
-            ]).then (answer=>{
-                db.query('INSERT INTO role(title,salary,department_id)values ( ?,?,? )' , [name,salary,answer.choice]).then(res=>{
-                    console.log(`${name} Role added with a salary of ${salary} dollars`);
-                    menu();
+                }))
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'choice',
+                        message: 'Choose a department',
+                        choices: departments
+                    }
+                ]).then(answer => {
+                    db.query('INSERT INTO role(title,salary,department_id)values ( ?,?,? )', [name, salary, answer.choice]).then(res => {
+                        console.log(`${name} Role added with a salary of ${salary} dollars`);
+                        menu();
+                    })
                 })
-            })
-        });
+            });
 
-        
-
-        
-       
-
-    })
+        })
 }
 
+async function addDept() {
+
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'department',
+            message: 'Choose a department',
+        }
+    ])
+
+        .then(answer => {
+            let dept = answer.department;
+            db.query('INSERT INTO department(name) values (?)', [dept]).then(res => {
+                console.log(`The following department has been added to your department list : ${dept}`);
+                menu();
+            })
+
+        });
+}
+
+
+async function addEmployee() {
+
+    db.query('SELECT * FROM role', function (err, results) {
+        const roles = results.map(({ id, title }) => (
+            {
+                value: id,
+                name: `${title}`
+            }
+        ));
+
+        db.query('SELECT * FROM employee', function (err, results) {
+            const employees = results.map(({ id, first_name, last_name }) => (
+                {
+                    value: id,
+                    name: `${first_name} ${last_name}`
+                }
+            ));
+
+
+
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'first',
+                    message: "What's the employee's first name?"
+
+                },
+
+                {
+                    type: 'input',
+                    name: 'last',
+                    message: "What's the employee's last name?"
+
+                },
+
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: 'What is the role of the employee?',
+                    choices: roles
+
+                },
+                {
+                    type: 'list',
+                    name: 'manager',
+                    message: 'Who is the employees manager?',
+                    choices: employees
+                }
+
+            ])
+                .then(answer => {
+                    let firstname = answer.first;
+                    let lastname = answer.last;
+
+
+                    db.query('INSERT INTO employee(first_name,last_name) values (?,?)', [firstname, lastname]).then(res => {
+                        // console.log(`The following department has been added to your department list : ${dept}`);
+                        menu();
+                    })
+                })
+        }
+
+    });
+}
 menu();
