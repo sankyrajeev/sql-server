@@ -201,12 +201,61 @@ async function addEmployee() {
 
 
                     db.query('INSERT INTO employee(first_name,last_name,role_id,manager_id) values (?,?,?,?)', [firstname, lastname,role,manager]).then(res => {
-                        // console.log(`The following department has been added to your department list : ${dept}`);
+                        console.log(`The following employee has been added to your database : ${firstname}.${lastname} who role is ${role} under ${manager}`);
                         menu();
                     })
                 })
         })
 
     });
+}
+
+async function updateEmployee() {
+    db.query('SELECT * FROM employee', function (err, results) {
+        const employee = results.map(({ id, first_name, last_name }) => (
+            {
+                value: id,
+                name: `${first_name} ${last_name}`
+            }
+        ));
+        db.query('SELECT * FROM role', function (err, results) {
+            const roles = results.map(({ id, title }) => (
+                {
+                    value: id,
+                    name: `${title}`
+                }
+            ))
+            inquirer
+                .prompt([
+                    {
+                        type: 'list',
+                        name: 'employee',
+                        message: "Which employee's role would you like to update?",
+                        choices: employee
+                    },
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: "What would you like the employee's updated role to be?",
+                        choices: roles
+                    }
+                ]).then(function (answer) {
+                    console.log(answer)
+                    let roleid = answer.employee;
+                    console.log(roleid);
+
+                    //where we query the database to update the role of the employee
+                    db.query(`UPDATE employee(id) `, (roleid), function (err, results) {
+                        console.table('you have successfully updated your employee');
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.table(results);
+                        }
+                    })
+
+                });
+        })
+    })
 }
 menu();
