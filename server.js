@@ -241,11 +241,12 @@ async function updateEmployee() {
                     }
                 ]).then(function (answer) {
                     console.log(answer)
-                    let roleid = answer.employee;
+                    let employeeid = answer.employee;
+                    let roleid = answer.role;
                     console.log(roleid);
 
                     //where we query the database to update the role of the employee
-                    db.query(`UPDATE employee(id) `, (roleid), function (err, results) {
+                    db.query('UPDATE employee SET role_id = ? WHERE id = ?',[answer.role, answer.employee], function (err, results) {
                         console.table('you have successfully updated your employee');
                         if (err) {
                             console.log(err);
