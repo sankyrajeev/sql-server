@@ -253,6 +253,7 @@ async function updateEmployee() {
                         } else {
                             console.table(results);
                         }
+                        menu();
                     })
 
                 });
